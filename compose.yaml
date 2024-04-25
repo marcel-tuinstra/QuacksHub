@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  # Database service
+  quacksdb:
+    image: postgres:${POSTGRES_VERSION:-16}-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-quacks}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-S0meAwes0meQuacks}
+      POSTGRES_USER: ${POSTGRES_USER:-quack}
+    volumes:
+      - quacksdb_data:/var/lib/postgresql/data:rw
+    ports:
+      - "5432:5432"
+
+  # Symfony application service
+  quackshub:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/srv/app:rw,cached
+      - quackshub_cache:/srv/app/var/cache:rw
+      - quackshub_log:/srv/app/var/log:rw
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-quack}:${POSTGRES_PASSWORD:-S0meAwes0meQuacks}@quacksdb:5432/${POSTGRES_DB:-quacks}
+    depends_on:
+      - quacksdb
+    ports:
+      - "8000:80"
+
+volumes:
+  quacksdb_data:
+  quackshub_cache:
+  quackshub_log:

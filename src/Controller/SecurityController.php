@@ -29,17 +29,18 @@ class SecurityController extends AbstractController
             }
 
             $user = $userService->getByEmailAndSub($email, $sub);
-
             if (!$user) {
                 $user = $userService->createFromAuth0($email, $sub);
             }
+
+            $userService->generateToken($user);
         } else {
             $token = $request->headers->get('Authorization');
             $user  = $userService->getByToken($token);
-        }
 
-        if ($user->isTokenExpired()) {
-            $userService->generateToken($user);
+            if ($user->isTokenExpired()) {
+                return $this->json(['error' => 'Login failed, token expired.'], JsonResponse::HTTP_BAD_REQUEST);
+            }
         }
 
         return $this->json(['token' => $user->getToken(), 'user' => $user]);

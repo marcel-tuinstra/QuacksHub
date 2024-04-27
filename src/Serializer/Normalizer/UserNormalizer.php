@@ -3,7 +3,6 @@
 namespace App\Serializer\Normalizer;
 
 use App\Entity\User;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class UserNormalizer implements NormalizerInterface

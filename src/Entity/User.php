@@ -29,6 +29,9 @@ class User implements IdentifiableInterface, TimestampableInterface
     #[ORM\Column(length: 255)]
     private string $email;
 
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $nickname = null;
+
     #[ORM\Column(length: 255)]
     private string $sub;
 
@@ -57,6 +60,11 @@ class User implements IdentifiableInterface, TimestampableInterface
         return $this->email;
     }
 
+    public function getNickname(): ?string
+    {
+        return $this->nickname;
+    }
+
     public function getSub(): ?string
     {
         return $this->sub;
@@ -78,6 +86,13 @@ class User implements IdentifiableInterface, TimestampableInterface
     public function setId(string $id): static
     {
         $this->id = $id;
+
+        return $this;
+    }
+
+    public function setNickname(?string $nickname = null): static
+    {
+        $this->nickname = $nickname;
 
         return $this;
     }

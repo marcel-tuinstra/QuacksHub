@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Collection\UserCollection;
+use App\DTO\UserDTO;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use DateInterval;
@@ -54,5 +55,18 @@ class UserService
     public function getByToken(string $token): ?User
     {
         return $this->userRepository->findByToken($token);
+    }
+
+    public function update(User $user, UserDTO $userDTO): User
+    {
+        // For now we do not support changing the email
+        // $user->setEmail($userDTO->email);
+        $user->setNickname($userDTO->nickname);
+
+        // Further logic and database operations
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        return $user;
     }
 }

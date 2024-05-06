@@ -13,8 +13,10 @@ class UserNormalizer implements NormalizerInterface
     public function normalize($object, ?string $format = null, array $context = []): array
     {
         return [
-            'id'    => $object->getId(),
-            'email' => $object->getEmail()
+            'id'       => $object->getId(),
+            'email'    => $object->getEmail(),
+            'nickname' => $object->getNickname(),
+            'name'     => $object->getNickname() ?? $object->getEmail()
         ];
     }
 

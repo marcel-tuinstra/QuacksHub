@@ -21,7 +21,7 @@ final class Status implements ValueObjectInterface
 
     private const STATUS_NOT_STARTED = 'not_started';
     private const STATUS_IN_PROGRESS = 'in_progress';
-    private const STATUS_IN_TESTING = 'in_testing';
+    private const STATUS_IN_TESTING  = 'in_testing';
     private const STATUS_COMPLETED   = 'completed';
     private const STATUS_HALTED      = 'halted';
 
@@ -42,6 +42,9 @@ final class Status implements ValueObjectInterface
         return $this->value;
     }
 
+    // Creators
+    //////////////////////////////
+
     public static function notStarted(): self
     {
         return new self(self::STATUS_NOT_STARTED);
@@ -51,6 +54,7 @@ final class Status implements ValueObjectInterface
     {
         return new self(self::STATUS_IN_PROGRESS);
     }
+
     public static function inTesting(): self
     {
         return new self(self::STATUS_IN_TESTING);
@@ -64,5 +68,33 @@ final class Status implements ValueObjectInterface
     public static function halted(): self
     {
         return new self(self::STATUS_HALTED);
+    }
+
+    // Checkers
+    //////////////////////////////
+
+    public function isNotStarted(): bool
+    {
+        return $this->value === self::STATUS_NOT_STARTED;
+    }
+
+    public function isInProgress(): bool
+    {
+        return $this->value === self::STATUS_IN_PROGRESS;
+    }
+
+    public function isInTesting(): bool
+    {
+        return $this->value === self::STATUS_IN_TESTING;
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->value === self::STATUS_COMPLETED;
+    }
+
+    public function isHalted(): bool
+    {
+        return $this->value === self::STATUS_HALTED;
     }
 }

@@ -20,14 +20,16 @@ class ProjectNormalizer implements NormalizerInterface
             'category'    => $object->getCategory()->value(),
             'status'      => $object->getStatus()->value(),
             'dueAt'       => $object->getDueAt()?->format('Y-m-d'),
-            'percentage'  => mt_rand(0, 100),
+            'percentage'  => $object->getProgress(),
             'meta'        => [
                 'createdAt' => $object->getCreatedAt()?->format(DateTimeInterface::ATOM),
                 'updatedAt' => $object->getUpdatedAt()?->format(DateTimeInterface::ATOM),
                 'deletedAt' => $object->getDeletedAt()?->format(DateTimeInterface::ATOM),
                 'isDeleted' => $object->isDeleted()
             ],
-            'counters'    => []
+            'counters'    => [
+                'tasks' => $object->getTasks()->count(),
+            ]
         ];
     }
 

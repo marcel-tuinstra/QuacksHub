@@ -3,8 +3,10 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use App\Collection\Project\TaskCollection;
 use App\Entity\Interfaces\IdentifiableInterface;
 use App\Entity\Interfaces\TimestampableInterface;
+use App\Entity\Project\Task;
 use App\Entity\Traits\EqualsTrait;
 use App\Entity\Traits\OwnerTrait;
 use App\Entity\Traits\TimestampableTrait;
@@ -12,6 +14,7 @@ use App\Repository\ProjectRepository;
 use App\ValueObject\Project\Category;
 use App\ValueObject\Project\Status;
 use DateTime;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -45,6 +48,9 @@ class Project implements IdentifiableInterface, TimestampableInterface
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     protected ?DateTime $dueAt = null;
 
+    #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'project', orphanRemoval: true)]
+    private Collection $tasks;
+
     public function __construct(User $owner, string $title, Category $category)
     {
         $this->owner    = $owner;
@@ -53,6 +59,7 @@ class Project implements IdentifiableInterface, TimestampableInterface
 
         // Defaults
         $this->status = Status::notStarted();
+        $this->tasks  = new TaskCollection();
     }
 
     // Getters
@@ -87,6 +94,14 @@ class Project implements IdentifiableInterface, TimestampableInterface
     {
         return $this->description;
     }
+    public function getTasks(): TaskCollection
+    {
+        if (!$this->tasks instanceof TaskCollection) {
+            $this->tasks = new TaskCollection($this->tasks->toArray());
+        }
+
+        return $this->tasks;
+    }
 
     // Setters
     //////////////////////////////
@@ -114,5 +129,54 @@ class Project implements IdentifiableInterface, TimestampableInterface
     public function setDescription(?string $description): void
     {
         $this->description = $description;
+    }
+
+    // Tasks
+    //////////////////////////////
+
+    public function addTask(Task $task): void
+    {
+        if (!$this->tasks->contains($task)) {
+            $this->tasks->add($task);
+            $task->setProject($this);
+        }
+    }
+
+    public function removeTask(Task $task): void
+    {
+        if ($this->tasks->removeElement($task)) {
+            // set the owning side to null (unless already changed)
+            if ($task->getProject() === $this) {
+                $task->setProject(null);
+            }
+        }
+    }
+
+    // Progress Calculation
+    //////////////////////////////
+
+    public function getProgress(): int
+    {
+        // If the project is not started, return 0% progress
+        if ($this->status->isNotStarted()) {
+            return 0;
+        }
+
+        // If the project is completed, return 100% progress
+        if ($this->status->isCompleted()) {
+            return 100;
+        }
+
+        $totalTasks = $this->tasks->count();
+
+        // If there are no tasks, but the project is in progress, return a baseline progress
+        if ($totalTasks === 0) {
+            return 10; // Baseline progress for a project in progress but with no tasks
+        }
+
+        $completedTasks = $this->tasks->getCompletedTasks()->count();
+
+        // Calculate the progress as a percentage of completed tasks
+        return (int)(($completedTasks / $totalTasks) * 100);
     }
 }

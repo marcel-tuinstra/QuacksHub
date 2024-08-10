@@ -14,6 +14,11 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('/api/user', name: 'app_user_')]
 class UserController extends AbstractController
 {
+    public function __construct(private readonly UserService $userService)
+    {
+        // noop
+    }
+
     #[Route('', name: 'create', methods: ['POST'])]
     public function create(Request $request): Response
     {
@@ -21,9 +26,9 @@ class UserController extends AbstractController
     }
 
     #[Route('', name: 'read_all', methods: ['GET', 'OPTIONS'])]
-    public function readAll(UserService $userService): Response
+    public function readAll(): Response
     {
-        return $this->json($userService->getAll());
+        return $this->json($this->userService->getAll());
     }
 
     #[Route('/{id}', name: 'read', methods: ['GET'])]
@@ -33,10 +38,10 @@ class UserController extends AbstractController
     }
 
     #[Route('/{id}', name: 'update', methods: ['PUT'])]
-    public function update(Request $request, ValidatorInterface $validator, UserService $userService, User $user): Response
+    public function update(Request $request, ValidatorInterface $validator, User $user): Response
     {
         // Decode the JSON content and create our User DTO
-        $userDTO = new UserDTO(json_decode($request->getContent(), true));
+        $userDTO = UserDTO::fromRequest($request);
 
         // Validate the DTO
         $violations = $validator->validate($userDTO);
@@ -49,7 +54,7 @@ class UserController extends AbstractController
         }
 
         // Pass the DTO to the service
-        $userService->update($user, $userDTO);
+        $this->userService->update($user, $userDTO);
 
         // Return the updated user data
         return $this->json($user);

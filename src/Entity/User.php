@@ -11,12 +11,13 @@ use App\Repository\UserRepository;
 use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ApiResource]
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-class User implements IdentifiableInterface, TimestampableInterface
+class User implements IdentifiableInterface, TimestampableInterface, UserInterface
 {
     use EqualsTrait;
     use TimestampableTrait;
@@ -83,13 +84,6 @@ class User implements IdentifiableInterface, TimestampableInterface
     // Setters
     //////////////////////////////
 
-    public function setId(string $id): static
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
     public function setNickname(?string $nickname = null): static
     {
         $this->nickname = $nickname;
@@ -117,5 +111,47 @@ class User implements IdentifiableInterface, TimestampableInterface
     public function isTokenExpired(): bool
     {
         return $this->tokenExpiration !== null && $this->tokenExpiration->getTimestamp() < time();
+    }
+
+    public function isTokenAboutToExpire(): bool
+    {
+        // Define the threshold in seconds (10 minutes * 60 seconds/minute)
+        $thresholdInSeconds = 10 * 60;
+
+        // Check if the token expiration time is set
+        if ($this->tokenExpiration !== null) {
+            // Get the current timestamp
+            $currentTime = time();
+
+            // Get the token expiration timestamp
+            $tokenExpirationTime = $this->tokenExpiration->getTimestamp();
+
+            // Calculate the time difference between the token expiration and the current time
+            $timeLeft = $tokenExpirationTime - $currentTime;
+
+            // Check if the time left is less than or equal to the threshold
+            return $timeLeft > 0 && $timeLeft <= $thresholdInSeconds;
+        }
+
+        // If the token expiration is not set, consider the token as not about to expire
+        return false;
+    }
+
+    // Security
+    //////////////////////////////
+
+    public function getRoles(): array
+    {
+        return [];
+    }
+
+    public function eraseCredentials()
+    {
+        // TODO: Implement eraseCredentials() method.
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->getId();
     }
 }

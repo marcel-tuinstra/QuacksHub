@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 trait OwnerTrait
 {
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne(cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $owner;
 
@@ -24,4 +24,8 @@ trait OwnerTrait
         return $this;
     }
 
+    public function isOwner(User $user): bool
+    {
+        return User::equals($this->owner, $user);
+    }
 }

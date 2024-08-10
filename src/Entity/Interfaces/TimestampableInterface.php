@@ -19,5 +19,5 @@ interface TimestampableInterface
 
     public function getDeletedAt(): ?DateTimeImmutable;
 
-    public function isRemoved(): bool;
+    public function isDeleted(): bool;
 }

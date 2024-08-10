@@ -19,17 +19,33 @@ trait TimestampableTrait
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     protected ?DateTimeImmutable $deletedAt = null;
 
+    // Getters
+    //////////////////////////////
+
+    public function getCreatedAt(): DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function getUpdatedAt(): ?DateTime
+    {
+        return $this->updatedAt;
+    }
+
+    public function getDeletedAt(): ?DateTimeImmutable
+    {
+        return $this->deletedAt;
+    }
+
+    // Setters
+    //////////////////////////////
+
     #[ORM\PrePersist]
     public function setCreatedAt(): static
     {
         $this->createdAt = DateTimeUtility::nowUtcAsImmutable();
 
         return $this;
-    }
-
-    public function getCreatedAt(): DateTimeImmutable
-    {
-        return $this->createdAt;
     }
 
     #[ORM\PreUpdate]
@@ -40,11 +56,6 @@ trait TimestampableTrait
         return $this;
     }
 
-    public function getUpdatedAt(): ?DateTime
-    {
-        return $this->updatedAt;
-    }
-
     public function setDeletedAt(?DateTimeImmutable $deletedAt = null): static
     {
         $this->deletedAt = $deletedAt;
@@ -52,12 +63,10 @@ trait TimestampableTrait
         return $this;
     }
 
-    public function getDeletedAt(): ?DateTimeImmutable
-    {
-        return $this->deletedAt;
-    }
+    // Derived Methods
+    //////////////////////////////
 
-    public function isRemoved(): bool
+    public function isDeleted(): bool
     {
         return $this->deletedAt instanceof DateTimeImmutable;
     }

@@ -50,6 +50,10 @@ class SecurityController extends AbstractController
             if ($user->isTokenExpired()) {
                 return $this->json(['error' => 'Login failed, token expired.'], JsonResponse::HTTP_BAD_REQUEST);
             }
+
+            if ($user->isTokenAboutToExpire()) {
+                $userService->generateToken($user);
+            }
         }
 
         return $this->json(['token' => $user->getToken(), 'user' => $user]);

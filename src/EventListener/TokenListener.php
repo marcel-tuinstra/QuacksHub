@@ -8,16 +8,20 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use DateTime;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 final class TokenListener
 {
-    public function __construct(private readonly UserService $userService)
+    public function __construct(
+        private readonly UserService           $userService,
+        private readonly TokenStorageInterface $tokenStorage
+    )
     {
         // noop
     }
 
-    #[AsEventListener(event: KernelEvents::REQUEST)]
+    #[AsEventListener(event: KernelEvents::REQUEST, priority: 10)]
     public function onKernelRequest(RequestEvent $event): void
     {
         $request = $event->getRequest();
@@ -30,6 +34,15 @@ final class TokenListener
 
         if (!$validationResponse instanceof User) {
             $event->setResponse(new JsonResponse(['error' => $validationResponse], JsonResponse::HTTP_UNAUTHORIZED));
+            return;
+        }
+
+        // Set the user in the security token
+        try {
+            $securityToken = new UsernamePasswordToken($validationResponse, 'main', $validationResponse->getRoles());
+            $this->tokenStorage->setToken($securityToken);
+        } catch (\Exception $e) {
+            $event->setResponse(new JsonResponse(['error' => 'Failed to set security token'], JsonResponse::HTTP_UNAUTHORIZED));
         }
     }
 
@@ -47,5 +60,4 @@ final class TokenListener
 
         return $user;
     }
-
 }

@@ -9,10 +9,14 @@ use App\Entity\Traits\EqualsTrait;
 use App\Entity\Traits\OwnerTrait;
 use App\Entity\Traits\TimestampableTrait;
 use App\Repository\ProjectRepository;
+use App\ValueObject\Project\Category;
+use App\ValueObject\Project\Status;
+use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ApiResource]
+#[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: ProjectRepository::class)]
 #[ORM\Table(name: '`project`')]
 class Project implements IdentifiableInterface, TimestampableInterface
@@ -27,10 +31,29 @@ class Project implements IdentifiableInterface, TimestampableInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 64)]
-    private ?string $title = null;
+    private string $title;
+
+    #[ORM\Column(type: 'project:category')]
+    private Category $category;
+
+    #[ORM\Column(type: 'project:status')]
+    private Status $status;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    protected ?DateTime $dueAt = null;
+
+    public function __construct(User $owner, string $title, Category $category)
+    {
+        $this->owner    = $owner;
+        $this->title    = $title;
+        $this->category = $category;
+
+        // Defaults
+        $this->status = Status::notStarted();
+    }
 
     // Getters
     //////////////////////////////
@@ -40,9 +63,24 @@ class Project implements IdentifiableInterface, TimestampableInterface
         return $this->id;
     }
 
-    public function getTitle(): ?string
+    public function getTitle(): string
     {
         return $this->title;
+    }
+
+    public function getCategory(): Category
+    {
+        return $this->category;
+    }
+
+    public function getStatus(): Status
+    {
+        return $this->status;
+    }
+
+    public function getDueAt(): ?DateTime
+    {
+        return $this->dueAt;
     }
 
     public function getDescription(): ?string
@@ -53,24 +91,28 @@ class Project implements IdentifiableInterface, TimestampableInterface
     // Setters
     //////////////////////////////
 
-    public function setId(string $id): static
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    public function setTitle(string $title): static
+    public function setTitle(string $title): void
     {
         $this->title = $title;
-
-        return $this;
     }
 
-    public function setDescription(?string $description): static
+    public function setCategory(Category $category): void
+    {
+        $this->category = $category;
+    }
+
+    public function setStatus(Status $status): void
+    {
+        $this->status = $status;
+    }
+
+    public function setDueAt(?DateTime $dueAt): void
+    {
+        $this->dueAt = $dueAt;
+    }
+
+    public function setDescription(?string $description): void
     {
         $this->description = $description;
-
-        return $this;
     }
 }

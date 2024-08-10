@@ -2,28 +2,58 @@
 
 namespace App\Controller;
 
-use App\Collection\ProjectCollection;
+use App\DTO\ProjectDTO;
 use App\Entity\Project;
 use App\Service\ProjectService;
+use App\Service\UserService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/project', name: 'app_project_')]
 class ProjectController extends AbstractController
 {
-    #[Route('', name: 'create', methods: ['POST'])]
-    public function create(Request $request): Response
+    public function __construct(
+        private readonly ProjectService $projectService,
+        private readonly UserService    $userService
+    )
     {
-        // Logic to create a new user
+        // noop
     }
 
-    #[Route('', name: 'read_all', methods: ['GET'])]
-    public function readAll(ProjectService $projectService): Response
+    #[Route('', name: 'create', methods: ['POST'])]
+    #[IsGranted(attribute: 'project_create')]
+    public function create(Request $request, ValidatorInterface $validator): Response
     {
-        $this->json($projectService->getAllProjects());
+        // Decode the JSON content and create our Project DTO
+        $projectDTO = ProjectDTO::fromRequest($request);
+
+        // Validate the DTO
+        $violations = $validator->validate($projectDTO);
+        if (count($violations) > 0) {
+            $errors = [];
+            foreach ($violations as $violation) {
+                $errors[$violation->getPropertyPath()] = $violation->getMessage();
+            }
+
+            return $this->json(['errors' => $errors], Response::HTTP_BAD_REQUEST);
+        }
+
+        $currentUser = $this->userService->getByToken($request->headers->get('Authorization'));
+        $project     = $this->projectService->create($projectDTO, $currentUser);
+
+        return $this->json($project);
+    }
+
+    #[Route('', name: 'read_all', methods: ['GET', 'OPTIONS'])]
+    public function readAll(Request $request): Response
+    {
+        $currentUser = $this->userService->getByToken($request->headers->get('Authorization'));
+
+        return $this->json($this->projectService->getAllProjectsByOwner($currentUser));
     }
 
     #[Route('/{id}', name: 'read', methods: ['GET'])]
@@ -33,14 +63,34 @@ class ProjectController extends AbstractController
     }
 
     #[Route('/{id}', name: 'update', methods: ['PUT'])]
-    public function update(Request $request, Project $project): Response
+    #[IsGranted(attribute: 'project_update', subject: 'project')]
+    public function update(Request $request, ValidatorInterface $validator, Project $project): Response
     {
-        // Logic to update an existing user
+        // Decode the JSON content and create our Project DTO
+        $projectDTO = ProjectDTO::fromRequest($request);
+
+        // Validate the DTO
+        $violations = $validator->validate($projectDTO);
+        if (count($violations) > 0) {
+            $errors = [];
+            foreach ($violations as $violation) {
+                $errors[$violation->getPropertyPath()] = $violation->getMessage();
+            }
+            return $this->json(['errors' => $errors], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Pass the DTO to the service
+        $this->projectService->update($project, $projectDTO);
+
+        return $this->json($project);
     }
 
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
+    #[IsGranted(attribute: 'project_delete', subject: 'project')]
     public function delete(Project $project): Response
     {
-        // Logic to delete a user
+        $this->projectService->delete($project);
+
+        return $this->json([]);
     }
 }

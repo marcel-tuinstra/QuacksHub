@@ -27,6 +27,7 @@ class UserRepository extends ServiceEntityRepository
     public function findByEmailAndSub(string $email, string $sub): ?User
     {
         $queryBuilder = $this->createQueryBuilder(self::ALIAS);
+
         $this->andEmail($queryBuilder, $email);
         $this->andSub($queryBuilder, $sub);
 
@@ -36,6 +37,7 @@ class UserRepository extends ServiceEntityRepository
     public function findByToken(string $token): ?User
     {
         $queryBuilder = $this->createQueryBuilder(self::ALIAS);
+
         $this->andToken($queryBuilder, $token);
 
         return $queryBuilder->getQuery()->getOneOrNullResult();

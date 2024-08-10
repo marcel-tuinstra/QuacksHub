@@ -8,6 +8,11 @@ doctrine:
 
         profiling_collect_backtrace: '%kernel.debug%'
         use_savepoints: true
+
+        # Custom types
+        types:
+            project:status: App\Doctrine\Type\Project\StatusType
+            project:category: App\Doctrine\Type\Project\CategoryType
     orm:
         auto_generate_proxy_classes: true
         enable_lazy_ghost_objects: true

@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Project;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -17,42 +18,35 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ProjectRepository extends ServiceEntityRepository
 {
+    const ALIAS = 'p';
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Project::class);
     }
 
-    public function findAllByUser(User $user): array
+    public function countByOwner(User $user): int
     {
-        $queryBuilder = $this->createQueryBuilder('p');
-        $queryBuilder->andWhere('p.user = :user')
-            ->setParameter('user', $user);
+        $queryBuilder = $this->createQueryBuilder(self::ALIAS);
+        $queryBuilder->select(sprintf('COUNT(%s.id)', self::ALIAS));
+
+        $this->andOwner($queryBuilder, $user);
+
+        return $queryBuilder->getQuery()->getSingleScalarResult();
+    }
+
+    public function findAllByOwner(User $user): array
+    {
+        $queryBuilder = $this->createQueryBuilder(self::ALIAS);
+
+        $this->andOwner($queryBuilder, $user);
 
         return $queryBuilder->getQuery()->getResult();
     }
 
-    //    /**
-    //     * @return Project[] Returns an array of Project objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('p.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Project
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function andOwner(QueryBuilder $queryBuilder, User $owner): void
+    {
+        $queryBuilder->where('p.owner = :owner')
+            ->setParameter('owner', $owner);
+    }
 }

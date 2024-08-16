@@ -8,7 +8,7 @@ use App\Entity\Traits\EqualsTrait;
 use App\Entity\Traits\OwnerTrait;
 use App\Entity\Traits\TimestampableTrait;
 use App\Entity\User;
-use App\Repository\Project\TasksRepository;
+use App\Repository\Project\TaskRepository;
 use App\Utility\DateTimeUtility;
 use DateTime;
 use DateTimeInterface;
@@ -17,7 +17,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ApiResource]
 #[ORM\HasLifecycleCallbacks]
-#[ORM\Entity(repositoryClass: TasksRepository::class)]
+#[ORM\Entity(repositoryClass: TaskRepository::class)]
 #[ORM\Table(name: '`project_task`')]
 class Task
 {

@@ -25,6 +25,11 @@ class ProjectService
         return $this->projectRepository->countByOwner($owner);
     }
 
+    public function getActiveProjectsCountByOwner(User $owner): int
+    {
+        return $this->projectRepository->countActiveByOwner($owner);
+    }
+
     public function getAllProjectsByOwner(User $owner): ProjectCollection
     {
         return new ProjectCollection($this->projectRepository->findAllByOwner($owner));

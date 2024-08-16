@@ -35,6 +35,17 @@ class ProjectRepository extends ServiceEntityRepository
         return $queryBuilder->getQuery()->getSingleScalarResult();
     }
 
+    public function countActiveByOwner(User $user): int
+    {
+        $queryBuilder = $this->createQueryBuilder(self::ALIAS);
+        $queryBuilder->select(sprintf('COUNT(%s.id)', self::ALIAS));
+
+        $this->andOwner($queryBuilder, $user);
+        $this->andActive($queryBuilder);
+
+        return $queryBuilder->getQuery()->getSingleScalarResult();
+    }
+
     public function findAllByOwner(User $user): array
     {
         $queryBuilder = $this->createQueryBuilder(self::ALIAS);
@@ -46,7 +57,12 @@ class ProjectRepository extends ServiceEntityRepository
 
     public function andOwner(QueryBuilder $queryBuilder, User $owner): void
     {
-        $queryBuilder->where(sprintf('%s.owner = :owner', self::ALIAS))
+        $queryBuilder->andWhere(sprintf('%s.owner = :owner', self::ALIAS))
             ->setParameter('owner', $owner);
+    }
+
+    public function andActive(QueryBuilder $queryBuilder): void
+    {
+        $queryBuilder->andWhere(sprintf('%s.deletedAt IS NOT NULL', self::ALIAS));
     }
 }

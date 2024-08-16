@@ -1,20 +1,21 @@
 <?php
 
-namespace App\Security\Voter;
+namespace App\Security\Voter\Project;
 
 use App\Entity\Project;
+use App\Entity\Project\Task;
+use App\Security\Voter\UserTokenSupportedVoterTrait;
 use App\Service\UserService;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
-class ProjectVoter extends Voter
+class TaskVoter extends Voter
 {
     use UserTokenSupportedVoterTrait;
 
-    public const CREATE      = 'project_create';
-    public const UPDATE      = 'project_update';
-    public const DELETE      = 'project_delete';
+    public const UPDATE = 'task_update';
+    public const DELETE = 'task_delete';
 
     public function __construct(RequestStack $requestStack, UserService $userService)
     {
@@ -26,7 +27,7 @@ class ProjectVoter extends Voter
      */
     private function supportedAttributes(): array
     {
-        return [self::CREATE, self::UPDATE];
+        return [self::UPDATE];
     }
 
     /**
@@ -43,7 +44,7 @@ class ProjectVoter extends Voter
             return true;
         }
 
-        return in_array($attribute, $this->supportedAttributesForSubject()) && $subject instanceof Project;
+        return in_array($attribute, $this->supportedAttributesForSubject()) && $subject instanceof Task;
     }
 
     /**
@@ -52,7 +53,6 @@ class ProjectVoter extends Voter
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
         return match ($attribute) {
-            self::CREATE => true,
             self::UPDATE, self::DELETE => $subject->isOwner($this->getCurrentUser()),
             default => false,
         };

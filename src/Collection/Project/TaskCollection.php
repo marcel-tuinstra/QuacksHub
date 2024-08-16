@@ -18,6 +18,16 @@ class TaskCollection extends ObjectCollection implements Collection
      *
      * @return TaskCollection
      */
+    public function getActiveTasks(): TaskCollection
+    {
+        return new self($this->filter(fn(Task $task) => $task->getDeletedAt() === null)->toArray());
+    }
+
+    /**
+     * Get all completed tasks.
+     *
+     * @return TaskCollection
+     */
     public function getCompletedTasks(): TaskCollection
     {
         return new self($this->filter(fn(Task $task) => $task->getCompletedAt() !== null)->toArray());

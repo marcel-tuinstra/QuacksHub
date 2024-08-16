@@ -17,6 +17,7 @@ use DateTime;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\VarDumper\VarDumper;
 
 #[ApiResource]
 #[ORM\HasLifecycleCallbacks]
@@ -94,6 +95,7 @@ class Project implements IdentifiableInterface, TimestampableInterface
     {
         return $this->description;
     }
+
     public function getTasks(): TaskCollection
     {
         if (!$this->tasks instanceof TaskCollection) {
@@ -167,16 +169,15 @@ class Project implements IdentifiableInterface, TimestampableInterface
             return 100;
         }
 
-        $totalTasks = $this->tasks->count();
+        $activeTasks    = $this->getTasks()->getActiveTasks()->count();
+        $completedTasks = $this->getTasks()->getCompletedTasks()->count();
 
         // If there are no tasks, but the project is in progress, return a baseline progress
-        if ($totalTasks === 0) {
-            return 10; // Baseline progress for a project in progress but with no tasks
+        if ($activeTasks === 0) {
+            return 0; // Baseline progress for a project in progress but with no tasks
         }
 
-        $completedTasks = $this->tasks->getCompletedTasks()->count();
-
         // Calculate the progress as a percentage of completed tasks
-        return (int)(($completedTasks / $totalTasks) * 100);
+        return (int)(($completedTasks / $activeTasks) * 100);
     }
 }

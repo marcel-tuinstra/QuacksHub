@@ -11,6 +11,7 @@ doctrine:
 
         # Custom types
         types:
+            investment:category: App\Doctrine\Type\Investment\CategoryType
             project:status: App\Doctrine\Type\Project\StatusType
             project:category: App\Doctrine\Type\Project\CategoryType
     orm:

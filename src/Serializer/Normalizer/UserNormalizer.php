@@ -3,6 +3,7 @@
 namespace App\Serializer\Normalizer;
 
 use App\Entity\User;
+use App\Service\InvestmentService;
 use App\Service\Project\TaskService;
 use App\Service\ProjectService;
 use DateTimeInterface;
@@ -11,8 +12,9 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 class UserNormalizer implements NormalizerInterface
 {
     public function __construct(
-        private readonly ProjectService $projectService,
-        private readonly TaskService    $taskService,
+        private readonly InvestmentService $investmentService,
+        private readonly ProjectService    $projectService,
+        private readonly TaskService       $taskService,
     )
     {
         // noop
@@ -32,6 +34,10 @@ class UserNormalizer implements NormalizerInterface
                 'createdAt' => $object->getCreatedAt()->format(DateTimeInterface::ATOM),
             ],
             'counters' => [
+                'investments' => [
+                    'total'  => $this->investmentService->getInvestmentsCountByOwner($object),
+                    'active' => $this->investmentService->getInvestmentsCountByOwner($object, true),
+                ],
                 'projects' => [
                     'total'  => $this->projectService->getProjectsCountByOwner($object),
                     'active' => $this->projectService->getActiveProjectsCountByOwner($object),

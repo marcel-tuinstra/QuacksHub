@@ -42,4 +42,15 @@ class TaskCollection extends ObjectCollection implements Collection
     {
         return new self($this->filter(fn(Task $task) => $task->getCompletedAt() === null)->toArray());
     }
+
+    public function sortedByCreated(): TaskCollection
+    {
+        $tasks = $this->toArray();
+
+        usort($tasks, function ($taskA, $taskB) {
+            return $taskA->getCreatedAt() <=> $taskB->getCreatedAt();
+        });
+
+        return new self($tasks);
+    }
 }

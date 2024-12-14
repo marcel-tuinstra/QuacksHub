@@ -40,7 +40,7 @@ class TaskController extends AbstractController
     {
         $currentUser = $this->userService->getByToken($request->headers->get('Authorization'));
 
-        return $this->json($this->taskService->getTasksByProject($project));
+        return $this->json($this->taskService->getTasksByProject($project)->sortedByCreated());
     }
 
     #[Route('/{id}', name: 'read', methods: ['GET'])]

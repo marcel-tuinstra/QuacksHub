@@ -30,9 +30,9 @@ class ProjectService
         return $this->projectRepository->countActiveByOwner($owner);
     }
 
-    public function getAllProjectsByOwner(User $owner): ProjectCollection
+    public function getAllProjectsByOwner(User $owner, bool $excludeDeleted = true): ProjectCollection
     {
-        return new ProjectCollection($this->projectRepository->findAllByOwner($owner));
+        return new ProjectCollection($this->projectRepository->findAllByOwner($owner, $excludeDeleted));
     }
 
     public function create(ProjectDTO $projectDTO, User $owner): ?Project

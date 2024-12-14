@@ -28,7 +28,8 @@ class ProjectNormalizer implements NormalizerInterface
                 'isDeleted' => $object->isDeleted()
             ],
             'counters'    => [
-                'tasks' => $object->getTasks()->count(),
+                'tasks'     => $object->getTasks()->getActiveTasks()->count(),
+                'tasksOpen' => $object->getTasks()->getIncompleteTasks()->count(),
             ]
         ];
     }

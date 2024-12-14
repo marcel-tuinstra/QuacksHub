@@ -51,9 +51,10 @@ class ProjectController extends AbstractController
     #[Route('', name: 'read_all', methods: ['GET', 'OPTIONS'])]
     public function readAll(Request $request): Response
     {
-        $currentUser = $this->userService->getByToken($request->headers->get('Authorization'));
+        $currentUser    = $this->userService->getByToken($request->headers->get('Authorization'));
+        $excludeDeleted = $request->query->getBoolean('excludeDeleted', true);
 
-        return $this->json($this->projectService->getAllProjectsByOwner($currentUser));
+        return $this->json($this->projectService->getAllProjectsByOwner($currentUser, $excludeDeleted));
     }
 
     #[Route('/{id}', name: 'read', methods: ['GET'])]

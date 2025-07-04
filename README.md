@@ -14,7 +14,7 @@ Backend API voor Quacks – een minimalistische, Symfony-gebaseerde projectmanag
 
 ## Tech Stack
 
-- **Framework**: Symfony (v6 of v5, afhankelijk van composer.json)
+- **Framework**: Symfony 6
 - **Language**: PHP 8+
 - **Authenticatie**: LexikJWTAuthenticationBundle
 - **Database**: PostgreSQL

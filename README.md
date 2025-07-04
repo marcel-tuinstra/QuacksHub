@@ -21,5 +21,3 @@ Backend API voor Quacks – een minimalistische, Symfony-gebaseerde projectmanag
 - **ORM**: Doctrine
 - **Validatie**: Symfony Validator component
 - **Routing & Controllers**: Symfony Routing / Attributes
-- **Dependency management**: Composer
-- **Development tools**: Symfony CLI, dotenv, PHPUnit (indien aanwezig)
